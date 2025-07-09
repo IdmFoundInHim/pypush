@@ -205,6 +205,7 @@ class Connection:
     @asynccontextmanager
     async def _filter(self, topics: list[str]):
         for topic in topics:
+            protocol.ADD_KNOWN_TOPIC(topic)
             self._filters[topic] = self._filters.get(topic, 0) + 1
         await self._update_filter()
         yield
@@ -215,6 +216,7 @@ class Connection:
         await self._update_filter()
 
     async def mint_scoped_token(self, topic: str) -> bytes:
+        protocol.ADD_KNOWN_TOPIC(topic)
         topic_hash = sha1(topic.encode()).digest()
         await self._send(
             protocol.ScopedTokenCommand(token=await self.base_token, topic=topic_hash)

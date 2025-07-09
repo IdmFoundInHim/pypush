@@ -12,6 +12,12 @@ KNOWN_TOPICS = {'dev.jjtech.pypush.tests', 'com.apple.private.alloy.notes', 'com
 KNOWN_TOPICS_LOOKUP = {sha1(topic.encode()).digest():topic for topic in KNOWN_TOPICS}
 # fmt: on
 
+def ADD_KNOWN_TOPIC(topic: str):
+    # Add a topic and hash to the known topics and lookup
+    if topic not in KNOWN_TOPICS:
+        KNOWN_TOPICS.add(topic)
+        topic_hash = sha1(topic.encode()).digest()
+        KNOWN_TOPICS_LOOKUP[topic_hash] = topic
 
 @dataclass
 class Command:
@@ -177,6 +183,9 @@ class SendMessageCommand(Command):
             and self.outgoing is not None
         ) and not (self._token_topic_1 is not None and self._token_topic_2 is not None):
             raise ValueError("topic, token, and outgoing must be set.")
+        
+        if self.topic is not None and isinstance(self.topic, str):
+            ADD_KNOWN_TOPIC(self.topic)
 
         if self.outgoing is True:
             assert self.topic and self.token
